@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Math Battle!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FFCB05;
+            text-shadow: 3px 3px 0px #3D7DCA;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        .battle-arena {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D98E 100%);
+            border-radius: 15px;
+            border: 4px solid #2C5F2D;
+        }
+
+        .pokemon {
+            text-align: center;
+        }
+
+        .pokemon-sprite {
+            width: 150px;
+            height: 150px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+
+        .pokemon-name {
+            font-size: 0.8em;
+            color: #2C5F2D;
+            margin-bottom: 10px;
+        }
+
+        .health-bar {
+            background: #ddd;
+            border-radius: 10px;
+            height: 25px;
+            width: 150px;
+            border: 3px solid #333;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4ade80, #22c55e);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .health-fill.low {
+            background: linear-gradient(to right, #fbbf24, #f59e0b);
+        }
+
+        .health-fill.critical {
+            background: linear-gradient(to right, #ef4444, #dc2626);
+        }
+
+        .vs {
+            font-size: 2em;
+            color: #FF0000;
+            text-shadow: 2px 2px 0px #FFCB05;
+        }
+
+        .problem-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #FFF3CD;
+            border-radius: 15px;
+            border: 4px solid #FFD700;
+        }
+
+        .problem {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 0;
+        }
+
+        .calculator {
+            max-width: 400px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #6366f1, #8b5cf6);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .calc-display {
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 2.5em;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: right;
+            margin-bottom: 20px;
+            min-height: 70px;
+            border: 3px solid #333;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .calc-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2em;
+            padding: 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(145deg, #fbbf24, #f59e0b);
+            color: white;
+            box-shadow: 0 6px 0 #d97706, 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .calc-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d97706, 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .calc-btn:hover {
+            background: linear-gradient(145deg, #fcd34d, #fbbf24);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .action-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+        }
+
+        .action-btn.delete {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+        }
+
+        .action-btn.clear {
+            background: linear-gradient(145deg, #f97316, #ea580c);
+        }
+
+        .action-btn.submit {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #22c55e, #16a34a);
+            font-size: 1.1em;
+        }
+
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .instructions {
+            background: #E0F2FE;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 3px solid #0EA5E9;
+            font-size: 0.6em;
+            line-height: 1.6;
+            color: #0c4a6e;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .message.correct {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 3px solid #10B981;
+            display: block;
+        }
+
+        .message.incorrect {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 3px solid #EF4444;
+            display: block;
+        }
+
+        .message.game-over {
+            background: #DBEAFE;
+            color: #1E40AF;
+            border: 3px solid #3B82F6;
+            display: block;
+            font-size: 1.5em;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.3s;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .celebrate {
+            animation: celebrate 0.5s;
+        }
+
+        .defeated-pokemon {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #F3F4F6;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .defeated-pokemon.show {
+            display: flex;
+        }
+
+        .defeated-pokemon-icon {
+            width: 50px;
+            height: 50px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            object-fit: contain;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .defeated-pokemon-icon:hover {
+            opacity: 1;
+        }
+
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .victory-content {
+            text-align: center;
+            color: white;
+        }
+
+        .victory-content h2 {
+            font-size: 2em;
+            color: #FFCB05;
+            text-shadow: 3px 3px 0px #3D7DCA;
+            margin-bottom: 30px;
+            animation: pulse 1s infinite;
+        }
+
+        .evolution-animation {
+            width: 200px;
+            height: 200px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            animation: evolve 2s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes evolve {
+            0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        @keyframes firework {
+            0% { transform: translate(0, 0) scale(0); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(1); opacity: 0; }
+        }
+
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: firework 1s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 POKÉMON MATH BATTLE! 🎮</h1>
+        
+        <div class="battle-arena">
+            <div class="pokemon">
+                <img class="pokemon-sprite" id="playerSprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif" alt="Bulbasaur">
+                <div class="pokemon-name" id="playerName">BULBASAUR</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="playerHealth">HP: 5/5</div>
+                </div>
+            </div>
+            
+            <div class="vs">VS</div>
+            
+            <div class="pokemon">
+                <img class="pokemon-sprite" id="enemySprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/109.gif" alt="Team Rocket">
+                <div class="pokemon-name">TEAM ROCKET</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="enemyHealth">HP: 3/3</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-section">
+            <div class="problem" id="problem">Loading...</div>
+        </div>
+
+        <div class="calculator">
+            <div class="calc-display" id="display">0</div>
+            <div class="calc-buttons">
+                <button class="calc-btn" onclick="inputDigit('7')">7</button>
+                <button class="calc-btn" onclick="inputDigit('8')">8</button>
+                <button class="calc-btn" onclick="inputDigit('9')">9</button>
+                <button class="calc-btn" onclick="inputDigit('4')">4</button>
+                <button class="calc-btn" onclick="inputDigit('5')">5</button>
+                <button class="calc-btn" onclick="inputDigit('6')">6</button>
+                <button class="calc-btn" onclick="inputDigit('1')">1</button>
+                <button class="calc-btn" onclick="inputDigit('2')">2</button>
+                <button class="calc-btn" onclick="inputDigit('3')">3</button>
+                <button class="calc-btn" onclick="inputDigit('0')" style="grid-column: span 3;">0</button>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn delete" onclick="deleteDigit()">DELETE</button>
+                <button class="action-btn clear" onclick="clearDisplay()">CLEAR</button>
+                <button class="action-btn submit" onclick="submitAnswer()">SUBMIT ⚡</button>
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="defeated-pokemon" id="defeatedPokemon"></div>
+    </div>
+
+    <div class="victory-overlay" id="victoryOverlay">
+        <div class="victory-content">
+            <h2>🎉 VICTORY! 🎉</h2>
+            <img class="evolution-animation" id="evolutionSprite" src="https://archives.bulbagarden.net/media/upload/3/39/Spr_5b_001_m.png" alt="Evolving">
+            <p style="font-size: 1.2em; margin-top: 20px;">BULBASAUR EVOLVED INTO IVYSAUR!</p>
+        </div>
+    </div>
+
+    <script>
+        let playerHP = 5;
+        let enemyHP = 3;
+        let currentAnswer = 0;
+        let displayValue = '0';
+        let gameOver = false;
+        let currentStage = 1; // 1 = Bulbasaur, 2 = Ivysaur, 3 = Venusaur
+        let defeatedPokemon = []; // Track defeated Pokemon
+        
+        const stages = {
+            1: {
+                playerName: 'BULBASAUR',
+                playerSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif',
+                enemyName: null, // Will be set randomly
+                enemySprite: null, // Will be set randomly
+                enemyHP: 3,
+                evolutionSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif'
+            },
+            2: {
+                playerName: 'IVYSAUR',
+                playerSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/2.gif',
+                enemyName: null, // Will be set randomly
+                enemySprite: null, // Will be set randomly
+                enemyHP: 4,
+                evolutionSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/2.gif'
+            },
+            3: {
+                playerName: 'VENUSAUR',
+                playerSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/3.gif',
+                enemyName: null, // Will be set randomly
+                enemySprite: null, // Will be set randomly
+                enemyHP: 5,
+                evolutionSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/3.gif'
+            }
+        };
+        
+        const basePokemonHP3 = [
+            { name: 'PIDGEY', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/16.gif' },
+            { name: 'RATTATA', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/19.gif' },
+            { name: 'SPEAROW', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/21.gif' },
+            { name: 'ZUBAT', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/41.gif' },
+            { name: 'MEOWTH', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/52.gif' },
+            { name: 'PSYDUCK', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/54.gif' },
+            { name: 'POLIWAG', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/60.gif' },
+            { name: 'BELLSPROUT', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/69.gif' },
+            { name: 'TENTACOOL', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/72.gif' },
+            { name: 'MAGNEMITE', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/81.gif' },
+            { name: 'DODUO', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/84.gif' },
+            { name: 'SEEL', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/86.gif' },
+            { name: 'SHELLDER', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/90.gif' },
+            { name: 'KRABBY', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/98.gif' },
+            { name: 'HORSEA', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/116.gif' }
+        ];
+        
+        const basePokemonHP4 = [
+            { name: 'GEODUDE', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/74.gif' },
+            { name: 'MACHOP', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/66.gif' },
+            { name: 'GASTLY', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/92.gif' },
+            { name: 'ONIX', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/95.gif' },
+            { name: 'VOLTORB', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/100.gif' },
+            { name: 'PIDGEOTTO', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/17.gif' },
+            { name: 'RATICATE', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/20.gif' },
+            { name: 'ARBOK', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/24.gif' },
+            { name: 'SANDSLASH', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/28.gif' },
+            { name: 'GOLBAT', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/42.gif' },
+            { name: 'GLOOM', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/44.gif' },
+            { name: 'PERSIAN', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/53.gif' },
+            { name: 'GOLDUCK', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/55.gif' },
+            { name: 'POLIWHIRL', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/61.gif' },
+            { name: 'GRAVELER', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/75.gif' },
+            { name: 'HAUNTER', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/93.gif' }
+        ];
+        
+        const legendaryPokemon = [
+            { name: 'ARTICUNO', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/144.gif' },
+            { name: 'ZAPDOS', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/145.gif' },
+            { name: 'MOLTRES', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/146.gif' },
+            { name: 'MEWTWO', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/150.gif' },
+            { name: 'LUGIA', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/249.gif' },
+            { name: 'HO-OH', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/250.gif' }
+        ];
+
+        function generateProblem() {
+            let num1, num2;
+            const operation = Math.random() > 0.5 ? '+' : '-';
+            
+            // Adjust difficulty based on stage
+            if (currentStage === 1) {
+                // Easy: 1-9
+                num1 = Math.floor(Math.random() * 9) + 1;
+                num2 = Math.floor(Math.random() * 9) + 1;
+            } else if (currentStage === 2) {
+                // Medium: 1-20
+                num1 = Math.floor(Math.random() * 20) + 1;
+                num2 = Math.floor(Math.random() * 20) + 1;
+            } else {
+                // Hard: 1-50
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+            }
+            
+            if (operation === '+') {
+                currentAnswer = num1 + num2;
+                document.getElementById('problem').textContent = `${num1} + ${num2} = ?`;
+            } else {
+                if (num1 >= num2) {
+                    currentAnswer = num1 - num2;
+                    document.getElementById('problem').textContent = `${num1} - ${num2} = ?`;
+                } else {
+                    currentAnswer = num2 - num1;
+                    document.getElementById('problem').textContent = `${num2} - ${num1} = ?`;
+                }
+            }
+        }
+
+        function inputDigit(digit) {
+            if (gameOver) return;
+            if (displayValue === '0') {
+                displayValue = digit;
+            } else {
+                displayValue += digit;
+            }
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            if (gameOver) return;
+            displayValue = displayValue.slice(0, -1);
+            if (displayValue === '') displayValue = '0';
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            if (gameOver) return;
+            displayValue = '0';
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = displayValue;
+        }
+
+        function submitAnswer() {
+            if (gameOver) return;
+            
+            const userAnswer = parseInt(displayValue);
+            const problemEl = document.getElementById('problem');
+            const currentProblemText = problemEl.textContent.replace(' = ?', '');
+            
+            if (userAnswer === currentAnswer) {
+                problemEl.textContent = '✨ Correct! Team Rocket takes 1 damage! ✨';
+                problemEl.style.color = '#16a34a';
+                enemyHP--;
+                updateHealth();
+                document.getElementById('enemySprite').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('enemySprite').classList.remove('shake');
+                }, 300);
+                
+                if (enemyHP === 0) {
+                    endGame(true);
+                    return;
+                }
+                
+                // Show correct message for 3 seconds
+                setTimeout(() => {
+                    problemEl.style.color = '#333';
+                    clearDisplay();
+                    generateProblem();
+                }, 3000);
+            } else {
+                problemEl.textContent = `Uh-oh, ${currentProblemText} = ${currentAnswer}, not ${userAnswer}. Bulbasaur takes 1 damage...`;
+                problemEl.style.color = '#dc2626';
+                playerHP--;
+                updateHealth();
+                document.getElementById('playerSprite').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('playerSprite').classList.remove('shake');
+                }, 300);
+                
+                if (playerHP === 0) {
+                    endGame(false);
+                    return;
+                }
+                
+                // Show incorrect message for 5 seconds
+                setTimeout(() => {
+                    problemEl.style.color = '#333';
+                    clearDisplay();
+                    generateProblem();
+                }, 5000);
+            }
+        }
+
+        function updateHealth() {
+            const playerHealthEl = document.getElementById('playerHealth');
+            const enemyHealthEl = document.getElementById('enemyHealth');
+            const maxEnemyHP = stages[currentStage].enemyHP;
+            
+            playerHealthEl.textContent = `HP: ${playerHP}/5`;
+            playerHealthEl.style.width = `${(playerHP / 5) * 100}%`;
+            
+            enemyHealthEl.textContent = `HP: ${enemyHP}/${maxEnemyHP}`;
+            enemyHealthEl.style.width = `${(enemyHP / maxEnemyHP) * 100}%`;
+            
+            if (playerHP === 3 || playerHP === 2) playerHealthEl.classList.add('low');
+            if (playerHP === 1) {
+                playerHealthEl.classList.remove('low');
+                playerHealthEl.classList.add('critical');
+            }
+            
+            const enemyHalfHP = Math.ceil(maxEnemyHP / 2);
+            const enemyCriticalHP = Math.ceil(maxEnemyHP / 3);
+            
+            if (enemyHP <= enemyHalfHP && enemyHP > enemyCriticalHP) {
+                enemyHealthEl.classList.add('low');
+            }
+            if (enemyHP <= enemyCriticalHP) {
+                enemyHealthEl.classList.remove('low');
+                enemyHealthEl.classList.add('critical');
+            }
+        }
+
+        function endGame(won) {
+            gameOver = true;
+            const problemEl = document.getElementById('problem');
+            
+            if (won) {
+                // Add defeated Pokemon to collection
+                defeatedPokemon.push({
+                    name: stages[currentStage].enemyName,
+                    sprite: stages[currentStage].enemySprite
+                });
+                updateDefeatedPokemon();
+                
+                if (currentStage < 3) {
+                    // Show evolution and advance to next stage
+                    problemEl.textContent = `🎉 ${stages[currentStage].playerName} IS EVOLVING! 🎉`;
+                    problemEl.style.color = '#FFCB05';
+                    
+                    showEvolutionAnimation();
+                } else {
+                    // Final victory!
+                    problemEl.textContent = '🏆 ULTIMATE VICTORY! YOU ARE A POKÉMON MASTER! 🏆';
+                    problemEl.style.color = '#FFCB05';
+                    
+                    showFinalVictory();
+                }
+            } else {
+                problemEl.textContent = '💔 GAME OVER! Your Pokémon fainted... Try again!';
+                problemEl.style.color = '#dc2626';
+                
+                setTimeout(() => {
+                    if (confirm('Play again?')) {
+                        location.reload();
+                    }
+                }, 3000);
+            }
+        }
+        
+        function updateDefeatedPokemon() {
+            const container = document.getElementById('defeatedPokemon');
+            
+            if (defeatedPokemon.length === 0) {
+                container.classList.remove('show');
+                return;
+            }
+            
+            container.classList.add('show');
+            container.innerHTML = '';
+            
+            defeatedPokemon.forEach(pokemon => {
+                const img = document.createElement('img');
+                img.src = pokemon.sprite;
+                img.alt = pokemon.name;
+                img.className = 'defeated-pokemon-icon';
+                img.title = pokemon.name;
+                container.appendChild(img);
+            });
+        }
+        
+        function showEvolutionAnimation() {
+            const overlay = document.getElementById('victoryOverlay');
+            const victoryContent = overlay.querySelector('.victory-content');
+            overlay.style.display = 'flex';
+            
+            victoryContent.innerHTML = `
+                <h2>🎉 EVOLUTION! 🎉</h2>
+                <img class="evolution-animation" src="${stages[currentStage].evolutionSprite}" alt="Evolving">
+                <p style="font-size: 1.2em; margin-top: 20px;">${stages[currentStage].playerName} EVOLVED INTO ${stages[currentStage + 1].playerName}!</p>
+            `;
+            
+            createFireworks();
+            
+            setTimeout(() => {
+                advanceToNextStage();
+            }, 5000);
+        }
+        
+        function showFinalVictory() {
+            const overlay = document.getElementById('victoryOverlay');
+            const victoryContent = overlay.querySelector('.victory-content');
+            overlay.style.display = 'flex';
+            
+            victoryContent.innerHTML = `
+                <h2>🏆 CHAMPION! 🏆</h2>
+                <img class="evolution-animation" src="${stages[3].playerSprite}" alt="Venusaur">
+                <p style="font-size: 1.2em; margin-top: 20px;">YOU DEFEATED THE LEGENDARY POKÉMON!</p>
+                <p style="font-size: 1em; margin-top: 10px;">YOU ARE A POKÉMON MASTER!</p>
+            `;
+            
+            createFireworks();
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                // Reset game state but keep defeated Pokemon
+                currentStage = 1;
+                playerHP = 5;
+                gameOver = false;
+                
+                // Set up new stage 1 enemy
+                const enemy1 = basePokemonHP3[Math.floor(Math.random() * basePokemonHP3.length)];
+                stages[1].enemyName = enemy1.name;
+                stages[1].enemySprite = enemy1.sprite;
+                
+                // Update display
+                document.getElementById('playerSprite').src = stages[1].playerSprite;
+                document.getElementById('playerName').textContent = stages[1].playerName;
+                document.getElementById('enemySprite').src = stages[1].enemySprite;
+                const enemyNameElements = document.querySelectorAll('.pokemon-name');
+                enemyNameElements[1].textContent = stages[1].enemyName;
+                
+                enemyHP = stages[1].enemyHP;
+                
+                // Reset health bars
+                const playerHealthEl = document.getElementById('playerHealth');
+                const enemyHealthEl = document.getElementById('enemyHealth');
+                playerHealthEl.classList.remove('low', 'critical');
+                enemyHealthEl.classList.remove('low', 'critical');
+                
+                updateHealth();
+                
+                document.getElementById('problem').style.color = '#333';
+                clearDisplay();
+                generateProblem();
+            }, 5000);
+        }
+        
+        function advanceToNextStage() {
+            currentStage++;
+            
+            // Set up enemy Pokémon based on stage
+            if (currentStage === 1) {
+                const enemy = basePokemonHP3[Math.floor(Math.random() * basePokemonHP3.length)];
+                stages[1].enemyName = enemy.name;
+                stages[1].enemySprite = enemy.sprite;
+            } else if (currentStage === 2) {
+                const enemy = basePokemonHP4[Math.floor(Math.random() * basePokemonHP4.length)];
+                stages[2].enemyName = enemy.name;
+                stages[2].enemySprite = enemy.sprite;
+            } else if (currentStage === 3) {
+                const legendary = legendaryPokemon[Math.floor(Math.random() * legendaryPokemon.length)];
+                stages[3].enemyName = legendary.name;
+                stages[3].enemySprite = legendary.sprite;
+            }
+            
+            // Hide overlay first
+            document.getElementById('victoryOverlay').style.display = 'none';
+            
+            // Update player sprite and name
+            document.getElementById('playerSprite').src = stages[currentStage].playerSprite;
+            document.getElementById('playerName').textContent = stages[currentStage].playerName;
+            
+            // Update enemy sprite and name
+            document.getElementById('enemySprite').src = stages[currentStage].enemySprite;
+            const enemyNameElements = document.querySelectorAll('.pokemon-name');
+            enemyNameElements[1].textContent = stages[currentStage].enemyName;
+            
+            // Reset enemy HP only (player HP persists!)
+            enemyHP = stages[currentStage].enemyHP;
+            
+            // Reset health bars
+            const playerHealthEl = document.getElementById('playerHealth');
+            const enemyHealthEl = document.getElementById('enemyHealth');
+            enemyHealthEl.classList.remove('low', 'critical');
+            
+            updateHealth();
+            
+            // Reset game state
+            document.getElementById('problem').style.color = '#333';
+            gameOver = false;
+            clearDisplay();
+            generateProblem();
+        }
+
+        function createFireworks() {
+            const overlay = document.getElementById('victoryOverlay');
+            const colors = ['#FFD700', '#FF69B4', '#00CED1', '#FF6347', '#7FFF00', '#FF1493'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'px');
+                    firework.style.setProperty('--y', (Math.random() - 0.5) * 200 + 'px');
+                    overlay.appendChild(firework);
+                    
+                    setTimeout(() => firework.remove(), 1000);
+                }, i * 100);
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (gameOver) return;
+            
+            if (e.key >= '0' && e.key <= '9') {
+                inputDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                deleteDigit();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                submitAnswer();
+            } else if (e.key === 'Escape') {
+                clearDisplay();
+            }
+        });
+
+        // Initialize game
+        function initGame() {
+            // Set up stage 1 enemy (HP 3)
+            const enemy1 = basePokemonHP3[Math.floor(Math.random() * basePokemonHP3.length)];
+            stages[1].enemyName = enemy1.name;
+            stages[1].enemySprite = enemy1.sprite;
+            
+            // Update initial enemy display
+            document.getElementById('enemySprite').src = stages[1].enemySprite;
+            const enemyNameElements = document.querySelectorAll('.pokemon-name');
+            enemyNameElements[1].textContent = stages[1].enemyName;
+            
+            generateProblem();
+            updateDisplay();
+        }
+        
+        initGame();
+    </script>
+</body>
+</html>

@@ -125,9 +125,19 @@
         }
 
         .problem {
+            margin-bottom: 0;
+        }
+
+        #problem .formula {
             font-size: 2em;
             color: #333;
-            margin-bottom: 0;
+        }
+
+        #problem .feedback {
+            font-size: 1em;
+            line-height: 2em;
+            vertical-align: top;
+            /* color: #333; // color will be dynamically set */
         }
 
         .calculator {
@@ -401,7 +411,7 @@
         </div>
 
         <div class="problem-section">
-            <div class="problem" id="problem">Loading...</div>
+            <div class="problem" id="problem"><span class="formula">Loading...</span><span class="feedback"></span></div>
         </div>
 
         <div class="calculator">
@@ -520,6 +530,20 @@
             { name: 'HO-OH', sprite: 'sprites/250.gif' }
         ];
 
+        function displayFormula(formulaText) {
+            problemEl = document.getElementById('problem');
+            problemEl.querySelector('.formula').textContent = formulaText;
+            problemEl.querySelector('.feedback').textContent = '';
+        }
+
+        function displayAnswerFeedback(feedbackText, textColor) {
+            problemEl = document.getElementById('problem');
+            problemEl.querySelector('.formula').textContent = '';
+            feedbackEl = problemEl.querySelector('.feedback');
+            feedbackEl.textContent = feedbackText;
+            feedbackEl.style.color = textColor;
+        }
+
         function generateProblem() {
             let num1, num2;
             const operation = Math.random() > 0.5 ? '+' : '-';
@@ -541,14 +565,14 @@
             
             if (operation === '+') {
                 currentAnswer = num1 + num2;
-                document.getElementById('problem').textContent = `${num1} + ${num2} = ?`;
+                displayFormula(`${num1} + ${num2}`);
             } else {
                 if (num1 >= num2) {
                     currentAnswer = num1 - num2;
-                    document.getElementById('problem').textContent = `${num1} - ${num2} = ?`;
+                    displayFormula(`${num1} - ${num2}`);
                 } else {
                     currentAnswer = num2 - num1;
-                    document.getElementById('problem').textContent = `${num2} - ${num1} = ?`;
+                    displayFormula(`${num2} - ${num1}`);
                 }
             }
         }
@@ -584,12 +608,9 @@
             if (gameOver) return;
             
             const userAnswer = parseInt(displayValue);
-            const problemEl = document.getElementById('problem');
-            const currentProblemText = problemEl.textContent.replace(' = ?', '');
-            
+
             if (userAnswer === currentAnswer) {
-                problemEl.textContent = '✨ Correct! Team Rocket takes 1 damage! ✨';
-                problemEl.style.color = '#16a34a';
+                displayAnswerFeedback('✨ Correct! Team Rocket takes 1 damage! ✨', '#16a34a');
                 enemyHP--;
                 updateHealth();
                 document.getElementById('enemySprite').classList.add('shake');
@@ -604,13 +625,12 @@
                 
                 // Show correct message for 3 seconds
                 setTimeout(() => {
-                    problemEl.style.color = '#333';
                     clearDisplay();
                     generateProblem();
                 }, 3000);
             } else {
-                problemEl.textContent = `Uh-oh, ${currentProblemText} = ${currentAnswer}, not ${userAnswer}. Bulbasaur takes 1 damage...`;
-                problemEl.style.color = '#dc2626';
+                currentProblemText = document.getElementById('problem').querySelector('.formula').textContent;
+                displayAnswerFeedback(`Uh-oh, ${currentProblemText} = ${currentAnswer}. You take damage.`, '#dc2626');
                 playerHP--;
                 updateHealth();
                 document.getElementById('playerSprite').classList.add('shake');
@@ -675,20 +695,15 @@
                 
                 if (currentStage < 3) {
                     // Show evolution and advance to next stage
-                    problemEl.textContent = `🎉 ${stages[currentStage].playerName} IS EVOLVING! 🎉`;
-                    problemEl.style.color = '#FFCB05';
-                    
+                    displayAnswerFeedback(`🎉 ${stages[currentStage].playerName} IS EVOLVING! 🎉`, '#FFCB05');
                     showEvolutionAnimation();
                 } else {
                     // Final victory!
-                    problemEl.textContent = '🏆 ULTIMATE VICTORY! YOU ARE A POKÉMON MASTER! 🏆';
-                    problemEl.style.color = '#FFCB05';
-                    
+                    displayAnswerFeedback('🏆 ULTIMATE VICTORY! YOU ARE A POKÉMON MASTER! 🏆', '#FFCB05');
                     showFinalVictory();
                 }
             } else {
-                problemEl.textContent = '💔 GAME OVER! Your Pokémon fainted... Try again!';
-                problemEl.style.color = '#dc2626';
+                displayAnswerFeedback('💔 GAME OVER! Your Pokémon fainted... Try again!', '#dc2626');
                 
                 setTimeout(() => {
                     if (confirm('Play again?')) {

@@ -603,6 +603,10 @@
         function updateDisplay() {
             document.getElementById('display').textContent = displayValue;
         }
+        
+        function getEnemyPokemonName() {
+            return document.querySelectorAll('.pokemon-name')[1].textContent;
+        }
 
         function submitAnswer() {
             if (gameOver) return;
@@ -610,7 +614,7 @@
             const userAnswer = parseInt(displayValue);
 
             if (userAnswer === currentAnswer) {
-                displayAnswerFeedback('✨ Correct! Team Rocket takes 1 damage! ✨', '#16a34a');
+                displayAnswerFeedback(`✨ Correct! ${getEnemyPokemonName()} takes 1 damage! ✨`, '#16a34a');
                 enemyHP--;
                 updateHealth();
                 document.getElementById('enemySprite').classList.add('shake');
@@ -695,8 +699,10 @@
                 
                 if (currentStage < 3) {
                     // Show evolution and advance to next stage
-                    displayAnswerFeedback(`🎉 ${stages[currentStage].playerName} IS EVOLVING! 🎉`, '#FFCB05');
-                    showEvolutionAnimation();
+                    displayAnswerFeedback(`🎉 Congrats - You caught ${getEnemyPokemonName()}!`, '#FFCB05');
+                    setTimeout(() => {
+                        showEvolutionAnimation();
+                    }, 3000);
                 } else {
                     // Final victory!
                     displayAnswerFeedback('🏆 ULTIMATE VICTORY! YOU ARE A POKÉMON MASTER! 🏆', '#FFCB05');

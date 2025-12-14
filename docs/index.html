@@ -389,8 +389,14 @@
 
         .firework {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px currentColor;
+            filter: drop-shadow(0 0 5px currentColor);
+            opacity: 0.9;
+            will-change: transform, opacity;
+            transition: transform 0.1s ease-out, opacity 0.5s ease-out;
             border-radius: 50%;
             animation: firework 1s ease-out forwards;
         }
@@ -878,21 +884,43 @@
 
         function createFireworks() {
             const overlay = document.getElementById('victoryOverlay');
-            const colors = ['#FFD700', '#FF69B4', '#00CED1', '#FF6347', '#7FFF00', '#FF1493'];
+            const colors = ['#FFD700', '#FF69B4', '#00CED1', '#FF6347', '#7FFF00', '#FF1493', '#FF8C00', '#9370DB', '#00FF7F', '#FF00FF'];
             
-            for (let i = 0; i < 30; i++) {
+            // Create more fireworks with different sizes and timings
+            for (let i = 0; i < 200; i++) {
                 setTimeout(() => {
                     const firework = document.createElement('div');
                     firework.className = 'firework';
-                    firework.style.left = Math.random() * 100 + '%';
-                    firework.style.top = Math.random() * 100 + '%';
+                    // Position fireworks more towards the center
+                    const posX = 30 + Math.random() * 40; // Keep within 30-70% of screen width
+                    const posY = 30 + Math.random() * 40; // Keep within 30-70% of screen height
+                    firework.style.left = posX + '%';
+                    firework.style.top = posY + '%';
+                    
+                    // Random size between 10px and 30px
+                    const size = 10 + Math.random() * 20;
+                    firework.style.width = size + 'px';
+                    firework.style.height = size + 'px';
+                    
                     firework.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    firework.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'px');
-                    firework.style.setProperty('--y', (Math.random() - 0.5) * 200 + 'px');
+                    
+                    // More dynamic movement with larger spread
+                    const spread = 250 + Math.random() * 150; // 250-400px spread
+                    firework.style.setProperty('--x', (Math.random() - 0.5) * spread * 2 + 'px');
+                    firework.style.setProperty('--y', (Math.random() - 0.5) * spread * 2 + 'px');
+                    
+                    // Random rotation for more dynamic effect
+                    firework.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    
+                    // Random animation duration between 1-2 seconds
+                    const duration = 1 + Math.random() * 1;
+                    firework.style.animationDuration = `${duration}s`;
+                    
                     overlay.appendChild(firework);
                     
-                    setTimeout(() => firework.remove(), 1000);
-                }, i * 100);
+                    // Remove after animation completes
+                    setTimeout(() => firework.remove(), duration * 1000);
+                }, i * 50); // More frequent fireworks (every 50ms)
             }
         }
 

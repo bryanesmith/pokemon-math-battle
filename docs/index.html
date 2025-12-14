@@ -85,20 +85,30 @@
             height: 25px;
             width: 150px;
             border: 3px solid #333;
-            overflow: hidden;
             position: relative;
-        }
-
-        .health-fill {
-            height: 100%;
-            background: linear-gradient(to right, #4ade80, #22c55e);
-            transition: width 0.5s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.6em;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            color: black;
+            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+        }
+
+        .health-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(to right, #4ade80, #22c55e);
+            transition: width 0.5s ease;
+            z-index: 1;
+        }
+
+        .health-text {
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
         }
 
         .health-fill.low {
@@ -395,7 +405,8 @@
                 <img class="pokemon-sprite" id="playerSprite" src="sprites/1.gif" alt="Bulbasaur">
                 <div class="pokemon-name" id="playerName">BULBASAUR</div>
                 <div class="health-bar">
-                    <div class="health-fill" id="playerHealth">HP: 5/5</div>
+                    <div class="health-fill" id="playerHealth"></div>
+                    <span class="health-text">HP: 5/5</span>
                 </div>
             </div>
             
@@ -405,7 +416,8 @@
                 <img class="pokemon-sprite" id="enemySprite" src="sprites/109.gif" alt="Team Rocket">
                 <div class="pokemon-name">TEAM ROCKET</div>
                 <div class="health-bar">
-                    <div class="health-fill" id="enemyHealth">HP: 3/3</div>
+                    <div class="health-fill" id="enemyHealth"></div>
+                    <span class="health-text">HP: 3/3</span>
                 </div>
             </div>
         </div>
@@ -661,27 +673,37 @@
             const enemyHealthEl = document.getElementById('enemyHealth');
             const maxEnemyHP = stages[currentStage].enemyHP;
             
-            playerHealthEl.textContent = `HP: ${playerHP}/5`;
-            playerHealthEl.style.width = `${(playerHP / 5) * 100}%`;
+            // Update player health bar
+            const playerPercent = (playerHP / 5) * 100;
+            playerHealthEl.style.width = `${playerPercent}%`;
             
-            enemyHealthEl.textContent = `HP: ${enemyHP}/${maxEnemyHP}`;
-            enemyHealthEl.style.width = `${(enemyHP / maxEnemyHP) * 100}%`;
+            // Update enemy health bar
+            const enemyPercent = (enemyHP / maxEnemyHP) * 100;
+            enemyHealthEl.style.width = `${enemyPercent}%`;
             
-            if (playerHP === 3 || playerHP === 2) playerHealthEl.classList.add('low');
-            if (playerHP === 1) {
-                playerHealthEl.classList.remove('low');
+            // Update health text
+            document.querySelectorAll('.health-text')[0].textContent = `HP: ${playerHP}/5`;
+            document.querySelectorAll('.health-text')[1].textContent = `HP: ${enemyHP}/${maxEnemyHP}`;
+            
+            // Update health bar colors based on remaining health
+            if (playerHP <= 1) {
                 playerHealthEl.classList.add('critical');
+                playerHealthEl.classList.remove('low');
+            } else if (playerHP <= 2) {
+                playerHealthEl.classList.add('low');
+                playerHealthEl.classList.remove('critical');
+            } else {
+                playerHealthEl.classList.remove('low', 'critical');
             }
             
-            const enemyHalfHP = Math.ceil(maxEnemyHP / 2);
-            const enemyCriticalHP = Math.ceil(maxEnemyHP / 3);
-            
-            if (enemyHP <= enemyHalfHP && enemyHP > enemyCriticalHP) {
-                enemyHealthEl.classList.add('low');
-            }
-            if (enemyHP <= enemyCriticalHP) {
-                enemyHealthEl.classList.remove('low');
+            if (enemyHP <= 1) {
                 enemyHealthEl.classList.add('critical');
+                enemyHealthEl.classList.remove('low');
+            } else if (enemyHP <= Math.ceil(maxEnemyHP / 2)) {
+                enemyHealthEl.classList.add('low');
+                enemyHealthEl.classList.remove('critical');
+            } else {
+                enemyHealthEl.classList.remove('low', 'critical');
             }
         }
 
@@ -902,6 +924,12 @@
             document.getElementById('enemySprite').src = stages[1].enemySprite;
             const enemyNameElements = document.querySelectorAll('.pokemon-name');
             enemyNameElements[1].textContent = stages[1].enemyName;
+            
+            // Initialize health bars
+            const playerHealthEl = document.getElementById('playerHealth');
+            const enemyHealthEl = document.getElementById('enemyHealth');
+            playerHealthEl.style.width = '100%';
+            enemyHealthEl.style.width = '100%';
             
             generateProblem();
             updateDisplay();
